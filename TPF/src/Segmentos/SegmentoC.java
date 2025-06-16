@@ -12,7 +12,7 @@ public class SegmentoC implements Runnable {
 
     private final MonitorInterface monitor;
     private final PoliticaInterface politica;
-    private final int[] transiciones = {5, 6, 7}; // T5 (extra), T6 (inicio simple), T7 (fin simple)
+    private final int[] transiciones = {5, 6}; // T5 (inicio simple), T6 (fin simple)
 
     public SegmentoC(MonitorInterface monitor) {
         this.monitor = monitor;

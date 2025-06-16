@@ -9,7 +9,7 @@ import Segmentos.SegmentoE;
 public class Main {
     public static void main (String[] args) {
         // 1. MATRICES 
-        int plazas = 13; // Cantidad de plazas
+        int plazas = 12; // Cantidad de plazas
         int transiciones = 12; // Cantidad de transiciones
 
         int[][] Ipos = new int[plazas][transiciones]; 
@@ -26,13 +26,12 @@ public class Main {
         Ineg[3][5] = 1; // P3 → T5
         Ineg[6][2] = 1; // P6 → T2
         Ineg[6][5] = 1; // P6 → T5
-        Ineg[3][6] = 1; // P3 → T6
-        Ineg[6][6] = 1; // P6 → T6
-        Ineg[7][7] = 1; // P7 → T7
+        Ineg[3][5] = 1; // P3 → T5
+        Ineg[7][6] = 1; // P7 → T6
+        Ineg[3][7] = 1; // P3 → T7
         Ineg[6][7] = 1; // P6 → T7
-        Ineg[3][8] = 1; // P3 → T8
-        Ineg[8][9] = 1; // P8 → T9
-        Ineg[9][10] = 1;// P9 → T10
+        Ineg[8][8] = 1; // P8 → T8
+        Ineg[9][9] = 1; // P9 → T9
         Ineg[10][10] = 1;// P10 → T10
         Ineg[11][11] = 1;// P11 → T11
 
@@ -53,7 +52,6 @@ public class Main {
         Ipos[6][10] = 1; // T10 libera unidad de procesamiento
         Ipos[6][4] = 1;  // T4 libera unidad de procesamiento
         Ipos[6][6] = 1;  // T6 libera unidad de procesamiento
-        Ipos[6][5] = 1;  // T5 libera unidad de procesamiento   
 
         // 2. MARCADO INICIAL
         int[] marcadoInicial = new int[plazas];
