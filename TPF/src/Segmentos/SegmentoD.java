@@ -1,32 +1,43 @@
 package Segmentos;
 
-import app.Monitor;
+import app.LoggerTP;
+import app.MonitorInterface;
 
-public class SegmentoD extends Segmentos {
-    private static ThreadLocal<Integer> Transicion = new ThreadLocal<Integer>(){
-        protected Integer initialValue() {
-            return 8; // Esta variable valdra: 8, 9, 10, 11. Estos valores corresponden a T7, T8, T9, T10
-        }
-    };
+public class SegmentoD implements Runnable {
+    private final MonitorInterface monitor;
+    private int t = 8; // Comienza con T8
 
-    public SegmentoD(Monitor monitor) {
-        super(monitor);
+    public SegmentoD(MonitorInterface monitor) {
+        this.monitor = monitor;
     }
 
     @Override
     public void run() {
-        int t;
-        while(true){
-            t = Transicion.get();
-            monitor.fireTransition(t);
-            System.out.println("ProcesamientoComplejo: Transicion" + t);
+        String nombre = Thread.currentThread().getName();
 
-            t =+ 1;
-            if(t == 12){
+        while (!Thread.currentThread().isInterrupted()) {
+            if (monitor.getHabilitadas().contains(t)) {
+                if (monitor.fireTransition(t)) {
+                    String msg = nombre + " disparó T" + t;
+                    System.out.println(msg);
+                    LoggerTP.registrarTransicion(t);
+                }
+            }
+
+            // Avanza al siguiente paso del camino complejo: T8 → T9 → T10 → T8 ...
+            t++;
+            if (t > 10) {
                 t = 8;
             }
 
-            Transicion.set(t);
+            synchronized (monitor) {
+                try {
+                    monitor.wait(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
     }
 }

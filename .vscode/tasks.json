@@ -1,0 +1,10 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Compilar y ejecutar Main",
+			"command": "javac -d out src/app/*.java src/Segmentos/*.java && java -cp out app.Main"
+		}
+	]
+}

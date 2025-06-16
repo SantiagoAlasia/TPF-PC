@@ -1,33 +1,41 @@
 package Segmentos;
 
-import app.Monitor;
+import app.LoggerTP;
+import app.MonitorInterface;
 
+public class SegmentoA implements Runnable {
 
-public class SegmentoA extends Segmentos {
-    private static ThreadLocal<Integer> Transicion = new ThreadLocal<Integer>(){
-        protected Integer initialValue() {
-            return 0; // Esta variable valdra: 3, 4, 5. Estos valores corresponden a T2, T3, T4
-        }
-    };
+    private final MonitorInterface monitor;
+    private int t = 0; // Contador de transiciones disparadas
 
-    public SegmentoA(Monitor monitor) {
-        super(monitor);
+    public SegmentoA(MonitorInterface monitor) {
+        this.monitor = monitor;
     }
 
     @Override
     public void run() {
-        int t;
-        while(true){
-            t = Transicion.get();
-            monitor.fireTransition(t);
-            System.out.println("Entrada de datos: Transicion" + t);
-
-            t =+ 1;
-            if(t == 2){
-                t = 0;
+        String nombre = Thread.currentThread().getName();
+        while (!Thread.currentThread().isInterrupted()) {
+            // Usar getHabilitadas() porque estaHabilitada es privado en Monitor
+            if (monitor.getHabilitadas().contains(t)) {
+                if (monitor.fireTransition(t)) {
+                    String msg = nombre + " disparó T" + t;
+                    System.out.println(msg);
+                    LoggerTP.registrarTransicion(t);
+                }
             }
 
-            Transicion.set(t);
+            t = (t + 1) % 2; // alterna entre 0 y 1
+
+            synchronized (monitor) {
+                try {
+                    monitor.wait(50);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
     }
 }
+

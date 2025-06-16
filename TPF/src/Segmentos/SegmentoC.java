@@ -1,32 +1,55 @@
 package Segmentos;
 
-import app.Monitor;
+import app.MonitorInterface;
+import app.LoggerTP;
+import app.PoliticaPriorizada;
+import app.PoliticaInterface;
 
-public class SegmentoC extends Segmentos {
-    private static ThreadLocal<Integer> Transicion = new ThreadLocal<Integer>(){
-        protected Integer initialValue() {
-            return 6; // Esta variable valdra: 6, 7. Estos valores corresponden a T5, T6
-        }
-    };
+import java.util.ArrayList;
+import java.util.List;
 
-    public SegmentoC(Monitor monitor) {
-        super(monitor);
+public class SegmentoC implements Runnable {
+
+    private final MonitorInterface monitor;
+    private final PoliticaInterface politica;
+    private final int[] transiciones = {5, 6, 7}; // T5 (extra), T6 (inicio simple), T7 (fin simple)
+
+    public SegmentoC(MonitorInterface monitor) {
+        this.monitor = monitor;
+        this.politica = new PoliticaPriorizada();
     }
 
     @Override
     public void run() {
-        int t;
-        while(true){
-            t = Transicion.get();
-            monitor.fireTransition(t);
-            System.out.println("ProcesamientoSimple: Transicion" + t);
+        String nombre = Thread.currentThread().getName();
 
-            t =+ 1;
-            if(t == 8){
-                t = 6;
+        while (!Thread.currentThread().isInterrupted()) {
+            List<Integer> habilitadas = new ArrayList<>();
+            for (int t : transiciones) {
+                if (monitor.getHabilitadas().contains(t)) {
+                    habilitadas.add(t);
+                }
             }
 
-            Transicion.set(t);
+            int tElegida = -1;
+            if (!habilitadas.isEmpty()) {
+                tElegida = politica.cualTransicionDisparar(habilitadas);
+            }
+
+            if (tElegida != -1 && monitor.fireTransition(tElegida)) {
+                String msg = nombre + " disparó T" + tElegida;
+                System.out.println(msg);
+                LoggerTP.registrarTransicion(tElegida);
+            }
+
+            synchronized (monitor) {
+                try {
+                    monitor.wait(50); // configurable
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
         }
     }
 }

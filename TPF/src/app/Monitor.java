@@ -1,57 +1,77 @@
 package app;
 
-import java.util.Arrays;
-import java.util.concurrent.Semaphore;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Monitor implements MonitorInterface {
-    private final RdP rdp;
-    private final PoliticaInterface politica;
-    private Semaphore mutex;
-    private Colas colas;
-    private boolean k; // Variable de Estado
 
-    public Monitor (RdP rdp, PoliticaInterface politica, Colas colas) {
-        this.rdp = rdp;
-        this.politica = politica;
-        this.colas = colas;
-        mutex = new Semaphore(1);
+    private final int[] marcado;
+    private final int[][] Ipos; //entrada
+    private final int[][] Ineg;//salida
+    private final boolean[] transicionesTemporales;
+
+    public Monitor(int[] marcadoInicial, int[][] Ipos, int[][] Ineg, boolean[] temporales) {
+        this.marcado = marcadoInicial;
+        this.Ipos = Ipos;
+        this.Ineg = Ineg;
+        this.transicionesTemporales = temporales;
     }
 
-    @Override
-    public boolean fireTransition(int transition) {
-        try {
-            mutex.acquire();
-            k = true;
 
-            while (k) {
-                k = rdp.disparar(transition);
-                if (k) {
-                    int[] transicionesSensibilizadas = rdp.sensibilizadas();
-                    int[] variablesDeCondicion = colas.quienesEstan();
-                    int n = transicionesSensibilizadas.length;
+@Override
+public synchronized boolean fireTransition(int t) {
+    if (!estaHabilitada(t)) {
+        return false; // La transición no está habilitada
+    }
 
-                    int[] m = new int[n];
-                    for (int i = 0; i < n; i++) {
-                        m[i] = transicionesSensibilizadas[i] * variablesDeCondicion[i];
-                    }
+    //Quitar los tokens de las plazas de entrada
+    for (int p=0; p<marcado.length; p++) {
+        marcado[p] -= Ineg[p][t];
+    }
 
-                    if(Arrays.stream(m).max().getAsInt() > 0){
-                        int indice = politica.cualTransicionDisparar();
-                        colas.release(indice);
-                    }else{
-                        k = false;
-                    }
-                }else{
-                    mutex.release();
-                    colas.acquire(transition);
-                }
+    //Simular la demora si la transicion es temporal
+    if (transicionesTemporales[t]) {
+        long start = System.currentTimeMillis();
+        long waitTime = 100; // 100 ms
+        while (true) {
+            long elapsed = System.currentTimeMillis() - start;
+            long remaining = waitTime - elapsed;
+            if (remaining <= 0) break;
+            try {
+                wait(remaining);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
             }
-
-            mutex.release();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } finally{
-            return true;
         }
+    }
+
+    //Agregar los tokens a las plazas de salida
+    for (int p=0; p<marcado.length; p++) {
+        marcado[p] += Ipos[p][t];
+    }
+    // Notificar a otros hilos que el estado ha cambiado
+    notifyAll();
+    return true; // La transición se disparó exitosamente
+}
+    private boolean estaHabilitada(int t) {
+        for (int p = 0; p < marcado.length; p++) {
+            if (marcado[p] < Ineg[p][t]) {
+                return false; // Si alguna plaza no tiene suficientes tokens, la transición no está habilitada
+            }
+        }
+        return true; // Todas las plazas tienen suficientes tokens
+    }
+
+    // Agrego método público para obtener transiciones habilitadas
+    @Override
+    public List<Integer> getHabilitadas() {
+        List<Integer> habilitadas = new ArrayList<>();
+        for (int t = 0; t < Ineg[0].length; t++) {
+            if (estaHabilitada(t)) {
+                habilitadas.add(t);
+            }
+        }
+        return habilitadas;
     }
 }

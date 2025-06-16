@@ -1,5 +1,5 @@
 package app;
 
 public interface PoliticaInterface {
-    public int cualTransicionDisparar();
+    int cualTransicionDisparar(java.util.List<Integer> habilitadas);
 }
