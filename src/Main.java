@@ -2,6 +2,10 @@ import hilos.*;
 import monitor.Monitor;
 import monitor.MonitorInterface;
 import politica.Politica;
+import java.io.PrintWriter;
+import java.io.IOException;
+import analisis.AnalizadorLog;
+
 
 public class Main {
     public static void main(String[] args) {
@@ -12,18 +16,31 @@ public class Main {
         Politica politica = new Politica(false); // podés cambiar esto
 
         // 3. Crear todos los hilos del sistema
-        HiloAccesoBuffer hab = new HiloAccesoBuffer(monitor);        // T1 y T2
-        HiloPolitica hp = new HiloPolitica(monitor, politica);       // T3 o T6 o T8
-        HiloSimple hs = new HiloSimple(monitor);                     // T7
-        HiloMedio hm = new HiloMedio(monitor);                       // T4, T5
-        HiloComplejo hc = new HiloComplejo(monitor);                 // T9, T10, T11
+        Runnable hab = new HiloAccesoBuffer(monitor);            // T1 y T2
+        Runnable hp = new HiloPolitica(monitor, politica);       // T3 o T6 o T8
+        Runnable hs = new HiloSimple(monitor);                   // T7
+        Runnable hm = new HiloMedio(monitor);                    // T4, T5
+        Runnable hc = new HiloComplejo(monitor);                 // T9, T10, T11
 
-        // 4. Iniciar todos los hilos
-        hab.start();
-        hp.start();
-        hs.start();
-        hm.start();
-        hc.start();
+        //Limpiar el log
+        try (PrintWriter pw = new PrintWriter("transiciones.log")) {
+            pw.print(""); // Borra el contenido
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Thread thHab = new Thread(hab);
+        Thread thHp = new Thread(hp);
+        Thread thHs = new Thread(hs);
+        Thread thHm = new Thread(hm);
+        Thread thHc = new Thread(hc);
+
+        // Iniciar los hilos
+        thHab.start();
+        thHp.start();
+        thHs.start();
+        thHm.start();
+        thHc.start();
 
         // 5. Ejecutar durante un tiempo definido (ej: 30 segundos)
         try {
@@ -33,12 +50,17 @@ public class Main {
         }
 
         // 6. Detener todos los hilos de manera segura
-        hab.interrupt();
-        hp.interrupt();
-        hs.interrupt();
-        hm.interrupt();
-        hc.interrupt();
+        thHab.interrupt();
+        thHp.interrupt();
+        thHs.interrupt();
+        thHm.interrupt();
+        thHc.interrupt();
 
         System.out.println("Programa finalizado.");
+
+        System.out.println("\nAnalizando el log de transiciones...");
+        AnalizadorLog analizador = new AnalizadorLog();
+        analizador.analizar();
+
     }
 }

@@ -2,7 +2,7 @@ package hilos;
 
 import monitor.MonitorInterface;
 
-public class HiloAccesoBuffer extends Thread {
+public class HiloAccesoBuffer implements Runnable {
     private final MonitorInterface monitor;
 
     public HiloAccesoBuffer(MonitorInterface monitor) {
@@ -16,17 +16,6 @@ public class HiloAccesoBuffer extends Thread {
               if (exito1) {
                 monitor.fireTransition(2);  // T2: P1 -> P3+P2
               }
-              else {
-                dormir(100); // Si no se pudo disparar T1, esperar un poco
-         }
-        }
-    }
-
-    private void dormir(int milisegundos) {
-        try {
-            Thread.sleep(milisegundos);
-        }   catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restaurar el estado de interrupción
         }
     }
 }

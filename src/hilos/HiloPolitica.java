@@ -2,7 +2,7 @@ package hilos;
 import monitor.MonitorInterface;
 import politica.Politica;
 
-public class HiloPolitica extends Thread {
+public class HiloPolitica implements Runnable {
     private final MonitorInterface monitor;
     private final Politica politica;
 
@@ -26,21 +26,6 @@ public class HiloPolitica extends Thread {
                 case 2 -> // Modo complejo
                     exito = monitor.fireTransition(8);
             }
-
-            if (!exito) {
-                dormir (100); // Espera 100 ms antes de intentar de nuevo
-            }
         }
     }
-
-    private void dormir(int ms) {
-        try {
-            Thread.sleep(ms);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt(); // Restaurar el estado de interrupción
-        }
-    }
-
-    
-    
 }
