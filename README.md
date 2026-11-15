@@ -43,7 +43,7 @@ La elección del modo es un **conflicto** de la red que se resuelve mediante una
 ```
 .
 ├── src/             # Código fuente Java
-├── docs/            # Informe, diagrama de clases y diagramas de secuencia
+├── doc/            # Informe, diagrama de clases y diagramas de secuencia
 ├── logs/            # Logs de ejecución
 ├── pipe/            # Red de Petri (.xml) para PIPE
 └── README.md
