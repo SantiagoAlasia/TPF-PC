@@ -64,6 +64,7 @@ Las propiedades de la red (deadlock, vivacidad, seguridad) y los invariantes de 
 - Enunciado del TP Final de Programación Concurrente 2025, FCEFyN – UNC.
 - **Cantidad y responsabilidad de hilos:** *Algoritmos para determinar cantidad y responsabilidad de hilos en sistemas embebidos modelados con Redes de Petri.* ResearchGate.
   <https://www.researchgate.net/publication/358104149_Algoritmos_para_determinar_cantidad_y_responsabilidad_de_hilos_en_sistemas_embebidos_modelados_con_Redes_de_Petri_S_3_PR1>
+- **Informe:** <https://docs.google.com/document/d/10jZIbbuPiC-cOya8KHdMjyD7OXngPUpnOUL-aGOHBLg/edit?tab=t.0>
 
 ## Integrantes
 
